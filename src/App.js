@@ -1,32 +1,38 @@
 import { useEffect, useState } from 'react';
+import io from "socket.io-client";
+import Circle from "./components/Circle";
 import './App.css';
+import Square from './components/Square';
+
+const socket = io('http://localhost:8080')
 
 function App() {
-  let [positionCircle, setPositionCircle] = useState(0);
-  let [positionSquare, setPositionSquare] = useState(0);
+  let [positionCircleX, setPositionCircleX] = useState(0);
+  let [positionCircleY, setPositionCircleY] = useState(0);
+  let [positionSquareX, setPositionSquareX] = useState(0);
+  let [positionSquareY, setPositionSquareY] = useState(0);
   let [colorCircle, setColorCircle] = useState(0);
   let [colorSquare, setColorSquare] = useState(0);
 
   useEffect(()=>{
       getPositions();
-      setInterval(()=>getPositions(),1000);
   },[])
 
   let getPositions = () => {
-      fetch("http://localhost:8080/getDetails").then((result) => {
-         return result.json();
-      }).then((res) => {
-        setPositionCircle(res.positionCircle);
-        setPositionSquare(res.positionSquare);
+      socket.on("getDetails", (res) => {
+        setPositionCircleX(res.positionCircleX);
+        setPositionCircleY(res.positionCircleY);
+        setPositionSquareX(res.positionSquareX);
+        setPositionSquareY(res.positionSquareY);
         setColorCircle(res.colorCircle);
         setColorSquare(res.colorSquare);
-      });
+      })
   }
 
   return (
     <div className="App">
-      <div className="circle" style={{margin: positionCircle, backgroundColor: colorCircle}}></div>
-      <div className="square" style={{margin: positionSquare, backgroundColor: colorSquare}}></div>
+      <Circle positionCircleX = {positionCircleX} positionCircleY={positionCircleY} colorCircle = {colorCircle}/>
+      <Square positionSquareX = {positionSquareX} positionSquareY={positionSquareY} colorSquare = {colorSquare} />
     </div>
   );
 }
